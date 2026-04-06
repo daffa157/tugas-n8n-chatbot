@@ -1,0 +1,162 @@
+{
+  "name": "NF Academy Customer Service Chatbot with Google Sheets Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo! Selamat datang di NF Academy. Saya siap membantu Anda dengan informasi tentang produk pelatihan dan harga kami. Ada yang bisa saya bantu?",
+        "options": {
+          "inputPlaceholder": "Ketik pertanyaan Anda di sini...",
+          "subtitle": "Tanyakan tentang produk pelatihan dan harga kami",
+          "title": "NF Academy Customer Service",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "f97285df-cf08-4800-a1d2-4ce1463bd5a4",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "1a1a3093-38bc-4717-9da2-94652d2dae96"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Anda adalah asisten layanan pelanggan profesional untuk NF Academy. Tugas Anda adalah membantu pelanggan dengan pertanyaan tentang produk pelatihan dan harga.\n\nPedoman:\n- Selalu gunakan tool \"Product Catalog Lookup\" untuk mencari informasi produk dan harga dari database\n- Jawab semua pertanyaan dalam Bahasa Indonesia dengan sopan dan profesional\n- Jika pelanggan bertanya tentang produk atau harga, cari informasi terbaru dari spreadsheet\n- Berikan informasi yang akurat dan lengkap\n- Jika tidak menemukan informasi yang diminta, sampaikan dengan sopan dan tawarkan bantuan alternatif",
+          "maxIterations": 10,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "5f107f56-42bd-4753-8cee-4b19335ad722",
+      "name": "Customer Service Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        520,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f38f14ae-5ad4-45b7-9c3f-ef9e612cc4a4",
+      "name": "Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        528
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qnn3ZiOFS5MRI3fT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "b4fa590b-7a7a-4031-9395-11bd78f94985",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1WfiJoG8qxD75OAxYumDbiSIrYGk7jOaJ9t8Z3DURGTg/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WfiJoG8qxD75OAxYumDbiSIrYGk7jOaJ9t8Z3DURGTg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "54a9447c-3939-464b-a0bf-348b1a04cef0",
+      "name": "Product Catalog Lookup",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        528
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5soFugUSUB6u2ChM",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Customer Service Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Customer Service Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Customer Service Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Catalog Lookup": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Service Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f4b6c2b8-44e3-4c9f-9956-d717d71a84b1",
+  "meta": {
+    "instanceId": "b0f7a19a96b0778b19393b05dc93891edcc051764ce8d3f7afd7ec87275ea496"
+  },
+  "id": "MsEI1OyeDape1dKs",
+  "tags": []
+}
