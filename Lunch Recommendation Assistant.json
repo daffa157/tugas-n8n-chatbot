@@ -1,0 +1,192 @@
+{
+  "name": "Lunch Recommendation Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1Jf6Ws9ClaxMogtTCcxloFSleQBtR5axP",
+          "mode": "list",
+          "cachedResultName": "Daftar_Menu.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1Jf6Ws9ClaxMogtTCcxloFSleQBtR5axP/view?usp=drivesdk"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "fileName": "Daftar_Menu.pdf"
+        }
+      },
+      "id": "2114c60e-6b9f-472c-925a-462b0e0dfa7a",
+      "name": "Download Menu PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        528,
+        304
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "TS4tXuLzAaE3PNBN",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "0d47b04f-c78c-4e75-a95f-cc3e0962d065",
+      "name": "Extract PDF Content",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=Kamu adalah asisten makan siang. Gunakan daftar menu dari PDF untuk memberikan rekomendasi berdasarkan chat user.\n\nDaftar Menu:\n{{ $(\"Extract PDF Content\").first().json.text }}"
+        }
+      },
+      "id": "f1311405-67ff-4d75-8f84-a0c7ece23785",
+      "name": "Lunch Recommendation Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        600
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "c53b935c-c0b4-45b0-b05f-d898c05e6fc2",
+      "name": "Google Gemini Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        472,
+        824
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "G3OusH0r1v3fLv8A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo! Mau makan apa hari ini?",
+        "options": {}
+      },
+      "id": "17178805-db49-4820-b5ff-8757c215b592",
+      "name": "Lunch Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        452
+      ],
+      "webhookId": "0f1d805c-2830-4739-9f93-29821a52ddf2"
+    },
+    {
+      "parameters": {},
+      "id": "b570196e-daee-4e14-8513-501c0f55ad4c",
+      "name": "Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        824
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download Menu PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Content": {
+      "main": [
+        []
+      ]
+    },
+    "Lunch Recommendation Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lunch Recommendation Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lunch Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Menu PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lunch Recommendation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Lunch Recommendation Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "40142ef3-ae42-4249-8a0c-388c6bc8a4fe",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "959831219840fb5b3e3b9c0077b36762cf0aee2c31718b49dae6dc39f0f6c049"
+  },
+  "id": "N5mUQGp0DVoFNmgf",
+  "tags": []
+}
